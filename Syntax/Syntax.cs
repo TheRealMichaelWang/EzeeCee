@@ -27,11 +27,21 @@ namespace EzeeCee.Syntax
 
     public partial interface IValue : IElement
     {
-           
+        
     }
 
     public partial interface IStatement : IElement
     {
 
+    }
+
+    public static class IElementExtensions
+    {
+        public static T As<T>(this IElement element) where T : IElement
+        {
+            if (element is T elem)
+                return elem;
+            throw new ArgumentException($"Expected {typeof(T).FullName}, but got {typeof(IElement).FullName} instead.");
+        } 
     }
 }
