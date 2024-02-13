@@ -21,10 +21,11 @@ namespace EzeeCee.Syntax
         public IElement SubstituteMacros(Linker linker, Dictionary<MacroParameter, IElement> macroArguments)
         {
             MacroDeclaration? macroDeclaration = linker.FindSymbol(SymbolPath, "macro")?.As<MacroDeclaration>();
-            if(macroDeclaration != null)
-            {
-
-            }
+            if (macroDeclaration != null)
+                return macroDeclaration.GetSubstituted(new()).SubstituteMacros(linker, macroArguments);
+            MacroParameter? macroParameter = linker.FindSymbol(SymbolPath, "macro")?.As<MacroParameter>();
+            if(macroParameter != null)
+                return macroArguments[ma]
         }
     }
 }
