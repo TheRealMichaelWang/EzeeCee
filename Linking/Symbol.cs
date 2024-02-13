@@ -147,6 +147,11 @@ namespace EzeeCee.Linking
 
     public static class ISymbolExtensions
     {
-
+        public static T? As<T>(this ISymbol symbol) where T : ISymbol
+        {
+            if (symbol is T elem)
+                return elem;
+            return null;
+        }
     }
 }

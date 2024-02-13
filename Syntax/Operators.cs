@@ -24,9 +24,31 @@ namespace EzeeCee.Syntax
 
         public IElement SubstituteMacros(Linker linker, Dictionary<MacroParameter, IElement> macroArguments)
         {
-            MacroDeclaration? macroDeclaration = linker.FindSymbol<MacroDeclaration>()
+            MacroDeclaration? macroDeclaration = linker.FindSymbol(SymbolToCall, "macro")?.As<MacroDeclaration>();
+            if(macroDeclaration != null)
+                return macroDeclaration.GetSubstituted(Arguments.SubstituteMacros(linker, macroArguments)).SubstituteMacros(linker, macroArguments);
+            MacroParameter? macroParameter = linker.FindSymbol(SymbolToCall, "macro")?.As<MacroParameter>();
+            if (macroParameter != null)
+                return new AnonymousFunctionCall(SourceLocation, macroArguments[macroParameter].As<IValue>(), Arguments.ConvertAll(argument => argument.SubstituteMacros(linker, macroArguments).As<IValue>()));
             return new FunctionCall(SourceLocation, SymbolToCall, Arguments.SubstituteMacros(linker, macroArguments));
         }
+    }
+
+    public sealed partial class AnonymousFunctionCall : IValue, IStatement
+    {
+        public SourceLocation SourceLocation { get; private set; }
+
+        public IValue FunctionValue { get; private set; }
+        public List<IValue> Arguments { get; private set; }
+
+        public AnonymousFunctionCall(SourceLocation sourceLocation, IValue functionValue, List<IValue> arguments)
+        {
+            SourceLocation = sourceLocation;
+            FunctionValue = functionValue;
+            Arguments = arguments;
+        }
+
+        public IElement SubstituteMacros(Linker linker, Dictionary<MacroParameter, IElement> macroArguments) => new AnonymousFunctionCall(SourceLocation, FunctionValue.SubstituteMacros(linker, macroArguments).As<IValue>(), Arguments.ConvertAll(argument => argument.SubstituteMacros(linker, macroArguments).As<IValue>()));
     }
 
     public sealed partial class BinaryOperator : IValue
@@ -46,7 +68,7 @@ namespace EzeeCee.Syntax
             Right = right;
         }
 
-        public IElement SubstituteMacros(Linker linker, Dictionary<MacroParameter, IElement> macroArguments) => new BinaryOperator(SourceLocation, Operator, Left.SubstituteMacros(macroArguments).As<IValue>(), Right.SubstituteMacros(macroArguments).As<IValue>());
+        public IElement SubstituteMacros(Linker linker, Dictionary<MacroParameter, IElement> macroArguments) => new BinaryOperator(SourceLocation, Operator, Left.SubstituteMacros(linker, macroArguments).As<IValue>(), Right.SubstituteMacros(linker, macroArguments).As<IValue>());
     }
 
     public sealed partial class GetAtIndex : IValue
@@ -63,7 +85,7 @@ namespace EzeeCee.Syntax
             Index = index;
         }
 
-        public IElement SubstituteMacros(Linker linker, Dictionary<MacroParameter, IElement> macroArguments) => new GetAtIndex(SourceLocation, Array.SubstituteMacros(macroArguments).As<IValue>(), Index.SubstituteMacros(macroArguments).As<IValue>());
+        public IElement SubstituteMacros(Linker linker, Dictionary<MacroParameter, IElement> macroArguments) => new GetAtIndex(SourceLocation, Array.SubstituteMacros(linker, macroArguments).As<IValue>(), Index.SubstituteMacros(linker, macroArguments).As<IValue>());
     }
 
     public sealed partial class SetAtIndex : IValue, IStatement
@@ -82,7 +104,7 @@ namespace EzeeCee.Syntax
             SetValue = setValue;
         }
 
-        public IElement SubstituteMacros(Linker linker, Dictionary<MacroParameter, IElement> macroArguments) => new SetAtIndex(SourceLocation, Array.SubstituteMacros(macroArguments).As<IValue>(), Index.SubstituteMacros(macroArguments).As<IValue>(), SetValue.SubstituteMacros(macroArguments).As<IValue>());
+        public IElement SubstituteMacros(Linker linker, Dictionary<MacroParameter, IElement> macroArguments) => new SetAtIndex(SourceLocation, Array.SubstituteMacros(linker, macroArguments).As<IValue>(), Index.SubstituteMacros(linker, macroArguments).As<IValue>(), SetValue.SubstituteMacros(linker, macroArguments).As<IValue>());
     }
 
     public sealed partial class GetProperty : IValue
@@ -99,7 +121,7 @@ namespace EzeeCee.Syntax
             PropertyName = propertyName;
         }
 
-        public IElement SubstituteMacros(Linker linker, Dictionary<MacroParameter, IElement> macroArguments) => new GetProperty(SourceLocation, Struct.SubstituteMacros(macroArguments).As<IValue>(), PropertyName);
+        public IElement SubstituteMacros(Linker linker, Dictionary<MacroParameter, IElement> macroArguments) => new GetProperty(SourceLocation, Struct.SubstituteMacros(linker, macroArguments).As<IValue>(), PropertyName);
     }
 
     public sealed partial class SetProperty : IValue, IStatement

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EzeeCee.Linking;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -17,6 +18,13 @@ namespace EzeeCee.Syntax
             SymbolPath = symbolPath;
         }
 
-        public IElement 
+        public IElement SubstituteMacros(Linker linker, Dictionary<MacroParameter, IElement> macroArguments)
+        {
+            MacroDeclaration? macroDeclaration = linker.FindSymbol(SymbolPath, "macro")?.As<MacroDeclaration>();
+            if(macroDeclaration != null)
+            {
+
+            }
+        }
     }
 }
